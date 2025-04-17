@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matrix Terminal Typing</title>
+    <title>Matrix Terminal Typing with Sound</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
         body {
@@ -27,10 +27,26 @@
         @keyframes blink {
             50% { opacity: 0; }
         }
+        .controls {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            color: #00FF00;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
     <div class="terminal"><span id="text"></span><span id="cursor">_</span></div>
+    <div class="controls">
+        <label for="soundVolume">Sound Volume: </label>
+        <input type="range" id="soundVolume" min="0" max="1" step="0.1" value="0.5">
+        <label for="musicVolume">Music Volume: </label>
+        <input type="range" id="musicVolume" min="0" max="1" step="0.1" value="0.5">
+    </div>
+    <audio id="typingSound" src="https://cdn.pixabay.com/audio/2023/03/27/audio_d8cffd2f9e.mp3" preload="auto"></audio>
+    <audio id="backgroundMusic" src="https://cdn.pixabay.com/audio/2022/03/10/audio_7a8905c9c6.mp3" loop preload="auto"></audio>
     <script>
         const lines = [
             "Matrix OS v2.1",
@@ -50,101 +66,34 @@
             "elusive goal. This summary explores the inherent difficulties of securing",
             "digital assets, humanity's shortcomings in addressing these challenges, and",
             "the economic implications for businesses investing in security, drawing on",
-            "public research and notable examples.",
-            "",
-            "Challenges in Digital Security",
-            "",
-            "Digital security is a formidable task due to several key factors:",
-            "",
-            "- Expanding Attack Surface: The proliferation of Internet of Things (IoT)",
-            "  devices, cloud computing, and remote work has vastly increased the number",
-            "  of potential entry points for attackers. According to the National Institute",
-            "  of Standards and Technology (NIST), each new device or service introduces",
-            "  vulnerabilities that can be exploited.",
-            "",
-            "- Sophisticated Threats: Cyberattacks have grown more advanced. Ransomware,",
-            "  for example, has surged, with attackers encrypting data and demanding",
-            "  payment for its release. Phishing attacks leverage social engineering to",
-            "  deceive users, while zero-day exploits—unknown vulnerabilities—enable",
-            "  breaches before patches are available.",
-            "",
-            "- Asymmetry of Cybersecurity: Attackers need only find one weak spot to",
-            "  succeed, whereas defenders must secure every possible vector. This",
-            "  imbalance places an enormous burden on those tasked with protection.",
-            "",
-            "Humanity's Failures in Digital Security",
-            "",
-            "Despite the escalating threats, humanity has largely failed to keep pace:",
-            "",
-            "- Prioritizing Convenience Over Security: In the rush to innovate and deliver",
-            "  new products, security is often sidelined. Companies prioritize speed-to-",
-            "  market over robust safeguards, leaving systems vulnerable.",
-            "",
-            "- Talent Shortage: A global scarcity of skilled cybersecurity professionals",
-            "  hampers efforts to build effective defenses. The 2023 (ISC)² Cybersecurity",
-            "  Workforce Study highlights a gap of millions of unfilled positions worldwide.",
-            "",
-            "- Cultural and Organizational Barriers: Lack of awareness among employees",
-            "  frequently leads to breaches, such as falling for phishing scams. High-",
-            "  profile failures like the 2017 Equifax breach, which exposed data of 147",
-            "  million people due to an unpatched vulnerability, and the 2020 SolarWinds",
-            "  attack, where a compromised update affected thousands of organizations,",
-            "  illustrate systemic shortcomings.",
-            "",
-            "These incidents reveal how interconnected risks and delayed responses",
-            "exacerbate the problem, leaving society perpetually reactive rather than",
-            "proactive.",
-            "",
-            "The Cost of Security for Businesses",
-            "",
-            "Businesses opting for robust security measures face significant upfront costs,",
-            "yet the alternative is far costlier:",
-            "",
-            "- Initial Investments: Implementing security requires spending on technology,",
-            "  skilled personnel, and training. Regular audits and updates further increase",
-            "  expenses.",
-            "",
-            "- Cost of Breaches: IBM's 2023 Cost of a Data Breach Report pegs the average",
-            "  cost of a breach at $4.45 million, encompassing financial losses, legal",
-            "  penalties, and reputational damage. Security debt—unaddressed vulnerabilities",
-            "  that accumulate—can amplify future costs.",
-            "",
-            "- Regulatory Pressures: Laws like the General Data Protection Regulation",
-            "  (GDPR) and California Consumer Privacy Act (CCPA) mandate stringent",
-            "  protections, with non-compliance fines reaching millions. For instance,",
-            "  GDPR violations can cost up to €20 million or 4% of annual global turnover.",
-            "",
-            "While security demands substantial initial outlays, the catastrophic",
-            "consequences of breaches—financially and otherwise—demonstrate that neglecting",
-            "it is a far greater risk.",
-            "",
-            "Conclusion",
-            "",
-            "Digital security's complexity stems from an ever-growing attack surface,",
-            "sophisticated threats, and an uneven playing field between attackers and",
-            "defenders. Humanity's struggles—driven by misplaced priorities, insufficient",
-            "expertise, and organizational flaws—have allowed cyber threats to outpace",
-            "defenses. For businesses, the high upfront costs of security are undeniable,",
-            "but public research, such as IBM’s breach cost findings, underscores that the",
-            "price of failure is steeper still. Addressing this crisis requires a shift in",
-            "focus, investing in both technology and people to forge a more secure digital",
-            "future.",
-            "",
-            "Sources:",
-            "",
-            "- NIST publications on IoT and cloud security vulnerabilities.",
-            "- IBM 2023 Cost of a Data Breach Report.",
-            "- (ISC)² 2023 Cybersecurity Workforce Study.",
-            "- Reports on Equifax (2017) and SolarWinds (2020) incidents from cybersecurity analyses."
+            "public research and notable examples."
         ];
         let currentLine = 0;
         let currentChar = 0;
         let typedText = "";
+        const typingSound = document.getElementById('typingSound');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const soundVolume = document.getElementById('soundVolume');
+        const musicVolume = document.getElementById('musicVolume');
+
+        backgroundMusic.volume = musicVolume.value;
+        typingSound.volume = soundVolume.value;
+
+        musicVolume.addEventListener('input', () => {
+            backgroundMusic.volume = musicVolume.value;
+        });
+
+        soundVolume.addEventListener('input', () => {
+            typingSound.volume = soundVolume.value;
+        });
+
         function typeNext() {
             if (currentLine < lines.length) {
                 if (currentChar < lines[currentLine].length) {
                     typedText += lines[currentLine][currentChar];
                     currentChar++;
+                    typingSound.currentTime = 0; // Reset sound to start
+                    typingSound.play(); // Play typing sound
                     setTimeout(typeNext, 30);
                 } else {
                     if (currentLine < lines.length - 1) {
@@ -157,7 +106,9 @@
                 document.getElementById("text").innerText = typedText;
             }
         }
-        typeNext();
+
+        backgroundMusic.play(); // Start background music
+        typeNext(); // Start typing
     </script>
 </body>
 </html>
