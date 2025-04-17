@@ -20,6 +20,8 @@
             text-shadow: 0 0 5px #00FF00;
             height: 80vh;
             overflow-y: auto;
+            -ms-overflow-style: none;  /* Edge (& IE) */
+            scrollbar-width: none;     /* Firefox */
         }
         #cursor {
             animation: blink 1s step-end infinite;
@@ -137,9 +139,13 @@
             "- (ISC)² 2023 Cybersecurity Workforce Study.",
             "- Reports on Equifax (2017) and SolarWinds (2020) incidents from cybersecurity analyses."
         ];
+
         let currentLine = 0;
         let currentChar = 0;
         let typedText = "";
+        let autoScrollEnabled = true;
+        const term = document.querySelector(".terminal");
+
         function typeNext() {
             if (currentLine < lines.length) {
                 if (currentChar < lines[currentLine].length) {
@@ -152,10 +158,19 @@
                     currentChar = 0;
                     setTimeout(typeNext, 200);
                 }
+
                 document.getElementById("text").innerText = typedText;
+                if (autoScrollEnabled)
+                    term.scrollTop = term.scrollHeight;
             }
         }
         typeNext();
+
+        term.addEventListener('scroll', () => {
+            const threshold = 10; // pixels from the bottom
+            const atBottom = term.scrollHeight - term.scrollTop - term.clientHeight <= threshold;
+            autoScrollEnabled = atBottom;
+        });
     </script>
 </body>
 </html>
