@@ -146,13 +146,11 @@
                     typedText += lines[currentLine][currentChar];
                     currentChar++;
                     setTimeout(typeNext, 30);
-                } else {
-                    if (currentLine < lines.length - 1) {
-                        typedText += "\n";
-                        currentLine++;
-                        currentChar = 0;
-                        setTimeout(typeNext, 200);
-                    }
+                } else if (currentLine < lines.length - 1) {
+                    typedText += "\n";
+                    currentLine++;
+                    currentChar = 0;
+                    setTimeout(typeNext, 200);
                 }
                 document.getElementById("text").innerText = typedText;
             }
